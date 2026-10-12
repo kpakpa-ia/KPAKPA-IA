@@ -1,48 +1,301 @@
-
 <!DOCTYPE html>
 <html lang="fr">
-<head><link rel="manifest" href="./manifest.json">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kpakpa IA</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #101827;
-      color: white;
-      padding: 24px;
-      text-align: center;
-    }
-    .carte {
-      margin: 50px auto;
-      max-width: 400px;
-      background: #1d2b42;
-      padding: 24px;
-      border-radius: 18px;
-    }
-    button {
-      background: #3478f6;
-      color: white;
-      border: 0;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 16px;
-    }
-  </style>
-</head>
-<body>
-  <div class="carte">
-    <h1>Kpakpa IA</h1>
-    <p>Bienvenue dans ton nouvel assistant intelligent.</p>
-    <button onclick="saluer()">Commencer</button>
-    <p id="message"></p>
-  </div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Kpakpa IA</title>
 
-  <script>
-    function saluer() {
-      document.getElementById("message").textContent =
-        "Bravo ! Ton nouveau projet fonctionne.";
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101827;
+  color: white;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 17px;
+  background: #1d2b42;
+  border-bottom: 1px solid #34445e;
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: #3478f6;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+
+.titre {
+  font-size: 21px;
+  font-weight: bold;
+}
+
+.sous-titre {
+  color: #aab8ce;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+#messages {
+  max-width: 760px;
+  margin: auto;
+  padding: 18px 14px 115px;
+}
+
+.message {
+  padding: 13px 15px;
+  margin: 14px 0;
+  border-radius: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.user {
+  background: #3478f6;
+  margin-left: 12%;
+  border-bottom-right-radius: 4px;
+}
+
+.ai {
+  background: #1d2b42;
+  margin-right: 7%;
+  border: 1px solid #34445e;
+  border-bottom-left-radius: 4px;
+}
+
+form {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background: #101827;
+  border-top: 1px solid #34445e;
+}
+
+form input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px;
+  border-radius: 13px;
+  border: 1px solid #526078;
+  background: #1d2b42;
+  color: white;
+  font-size: 16px;
+  outline: none;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 15px;
+  background: #3478f6;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+button:disabled,
+input:disabled {
+  opacity: 0.6;
+}
+
+.accueil {
+  text-align: center;
+  padding: 35px 10px 20px;
+}
+
+.accueil h1 {
+  font-size: 27px;
+}
+
+.accueil p {
+  color: #aab8ce;
+  line-height: 1.6;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.actions button {
+  background: #1d2b42;
+  border: 1px solid #526078;
+  font-weight: normal;
+}
+
+.pied {
+  color: #8999b2;
+  font-size: 11px;
+  text-align: center;
+  padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">✦</div>
+  <div>
+    <div class="titre">Kpakpa IA</div>
+    <div class="sous-titre">Ton assistant intelligent</div>
+  </div>
+</header>
+
+<main id="messages">
+  <div class="accueil" id="accueil">
+    <h1>Bonjour ! 👋</h1>
+    <p>Je suis Kpakpa IA.<br>
+    Que puis-je faire pour toi aujourd'hui ?</p>
+
+    <div class="actions">
+      <button type="button" data-question="Présente-toi.">
+        Présente-toi
+      </button>
+      <button type="button" data-question="Aide-moi à apprendre quelque chose de nouveau.">
+        Apprendre
+      </button>
+      <button type="button" data-question="Donne-moi une idée de projet rentable avec peu de moyens.">
+        Idée de projet
+      </button>
+    </div>
+  </div>
+</main>
+
+<form id="chatForm">
+  <input
+    id="question"
+    type="text"
+    placeholder="Écris ta question..."
+    autocomplete="off"
+    required
+  >
+  <button id="envoyer" type="submit">Envoyer</button>
+</form>
+
+<script>
+const API_URL =
+  "https://white-union-ab54.trowonoukpakpa.workers.dev/";
+
+const form = document.getElementById("chatForm");
+const input = document.getElementById("question");
+const messages = document.getElementById("messages");
+const envoyer = document.getElementById("envoyer");
+const accueil = document.getElementById("accueil");
+
+let historique = [];
+let enCours = false;
+
+function ajouterMessage(texte, type) {
+  const bloc = document.createElement("div");
+  bloc.className = "message " + type;
+  bloc.textContent = texte;
+  messages.appendChild(bloc);
+  window.scrollTo(0, document.body.scrollHeight);
+  return bloc;
+}
+
+async function envoyerQuestion(texte) {
+  if (enCours || !texte.trim()) return;
+
+  accueil.style.display = "none";
+  enCours = true;
+  input.disabled = true;
+  envoyer.disabled = true;
+
+  ajouterMessage(texte, "user");
+
+  const attente = ajouterMessage(
+    "Kpakpa IA réfléchit...",
+    "ai"
+  );
+
+  const anciensMessages = historique.slice();
+
+  historique.push({
+    role: "user",
+    content: texte
+  });
+
+  try {
+    const reponse = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: historique.slice(-20)
+      })
+    });
+
+    const data = await reponse.json();
+
+    if (!reponse.ok || !data.reply) {
+      throw new Error(
+        data.error || "Le service IA n'a pas répondu."
+      );
     }
-  </script>
+
+    attente.textContent = data.reply;
+
+    historique.push({
+      role: "assistant",
+      content: data.reply
+    });
+
+  } catch (erreur) {
+    historique = anciensMessages;
+    attente.textContent =
+      "Je n'arrive pas à obtenir une réponse pour le moment.\n\n" +
+      "Détail : " + erreur.message +
+      "\n\nVérifie le serveur et ta connexion Internet, puis réessaie.";
+  } finally {
+    enCours = false;
+    input.disabled = false;
+    envoyer.disabled = false;
+    input.focus();
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+}
+
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const texte = input.value.trim();
+  if (!texte) return;
+
+  input.value = "";
+  envoyerQuestion(texte);
+});
+
+document.querySelectorAll("[data-question]").forEach(bouton => {
+  bouton.addEventListener("click", function() {
+    envoyerQuestion(bouton.dataset.question);
+  });
+});
+</script>
+
+<div class="pied">
+  Kpakpa IA · Assistant intelligent
+</div>
+
 </body>
 </html>
