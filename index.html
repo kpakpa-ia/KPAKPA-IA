@@ -1,320 +1,780 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101827">
-<title>Kpakpa IA</title>
+<meta name="description" content="Kpakpa IA, ton assistant intelligent.">
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" href="./icon-192.png">
-<style>
-* {
-  box-sizing: border-box;
-}
+<title>Kpakpa IA</title>
 
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0b1120;
+  --panel: #121c2e;
+  --panel2: #1a2840;
+  --border: #2a3a53;
+  --text: #f3f6fc;
+  --muted: #9aabc3;
+  --blue: #3979f6;
+}
+* { box-sizing: border-box; }
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #101827;
-  color: white;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .55; cursor: wait; }
 
-header {
+.app {
+  height: 100dvh;
+  display: flex;
+  overflow: hidden;
+}
+.sidebar {
+  width: 285px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 17px 13px;
+  background: #0e1728;
+  border-right: 1px solid var(--border);
+}
+.brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 17px;
-  background: #1d2b42;
-  border-bottom: 1px solid #34445e;
+  padding: 5px;
 }
-
 .logo {
-  width: 38px;
-  height: 38px;
+  width: 43px;
+  height: 43px;
+  object-fit: contain;
+  border-radius: 13px;
+  flex-shrink: 0;
+}
+.brand-name { font-weight: 800; font-size: 20px; }
+.brand-sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+.btn {
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #3478f6;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
+  padding: 11px 13px;
+  color: var(--text);
+  background: var(--panel2);
 }
-
-.titre {
-  font-size: 21px;
-  font-weight: bold;
+.btn:hover { filter: brightness(1.15); }
+.btn-primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  font-weight: 700;
 }
-
-.sous-titre {
-  color: #aab8ce;
+.new-chat { width: 100%; text-align: left; }
+.history-heading {
+  color: var(--muted);
   font-size: 12px;
-  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 7px 5px 0;
 }
-
-#messages {
-  max-width: 760px;
-  margin: auto;
-  padding: 18px 14px 115px;
-}
-
-.message {
-  padding: 13px 15px;
-  margin: 14px 0;
-  border-radius: 15px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.user {
-  background: #3478f6;
-  margin-left: 12%;
-  border-bottom-right-radius: 4px;
-}
-
-.ai {
-  background: #1d2b42;
-  margin-right: 7%;
-  border: 1px solid #34445e;
-  border-bottom-left-radius: 4px;
-}
-
-form {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+.history-list {
   display: flex;
-  gap: 8px;
-  padding: 12px;
-  background: #101827;
-  border-top: 1px solid #34445e;
+  flex-direction: column;
+  gap: 5px;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1;
 }
-
-form input {
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 11px;
+  border: 1px solid transparent;
+}
+.history-item.active {
+  background: var(--panel2);
+  border-color: var(--border);
+}
+.history-open {
   flex: 1;
   min-width: 0;
-  padding: 14px;
-  border-radius: 13px;
-  border: 1px solid #526078;
-  background: #1d2b42;
-  color: white;
-  font-size: 16px;
-  outline: none;
-}
-
-button {
+  color: var(--text);
   border: 0;
-  border-radius: 12px;
-  padding: 12px 15px;
-  background: #3478f6;
-  color: white;
-  font-size: 15px;
-  font-weight: bold;
+  background: transparent;
+  text-align: left;
+  padding: 8px 5px;
 }
-
-button:disabled,
-input:disabled {
-  opacity: 0.6;
+.history-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
 }
-
-.accueil {
-  text-align: center;
-  padding: 35px 10px 20px;
+.history-date {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
 }
-
-.accueil h1 {
-  font-size: 27px;
+.small-btn {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px;
 }
-
-.accueil p {
-  color: #aab8ce;
+.small-btn:hover { background: #30415b; color: white; }
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding: 12px 5px 0;
+  color: var(--muted);
+  font-size: 12px;
   line-height: 1.6;
 }
 
-.actions {
+.main {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
+  flex-direction: column;
+  position: relative;
 }
-
-.actions button {
-  background: #1d2b42;
-  border: 1px solid #526078;
-  font-weight: normal;
+.topbar {
+  min-height: 70px;
+  padding: 12px 19px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(18,28,46,.88);
 }
-
-.pied {
-  color: #8999b2;
-  font-size: 11px;
+.top-title { font-weight: 700; font-size: 16px; }
+.top-sub { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.menu-btn { display: none; }
+.status {
+  margin-left: auto;
+  color: #a8e8c1;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.status::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: #39cc7a;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.messages {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 25px 20px 35px;
+  flex: 1;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+.welcome {
+  max-width: 650px;
+  margin: 9vh auto 25px;
   text-align: center;
-  padding: 10px;
+}
+.welcome-logo {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+.welcome h1 { font-size: clamp(26px, 5vw, 36px); margin: 8px 0; }
+.welcome p {
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 15px;
+}
+.suggestions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 25px;
+}
+.suggestion {
+  text-align: left;
+  min-height: 75px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 13px;
+}
+.suggestion strong { display: block; font-size: 13px; margin-bottom: 5px; }
+.suggestion span { color: var(--muted); font-size: 12px; }
+
+.message {
+  max-width: 88%;
+  margin: 16px 0;
+  line-height: 1.75;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.message.user {
+  margin-left: auto;
+  padding: 12px 15px;
+  background: #2864d8;
+  border-radius: 18px 18px 5px 18px;
+  white-space: pre-wrap;
+}
+.message.ai {
+  margin-right: auto;
+  padding: 4px 2px;
+  white-space: pre-wrap;
+}
+.message-label {
+  color: #9ebeff;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.message-actions {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+.message-actions button {
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 8px;
+  font-size: 11px;
+  padding: 5px 9px;
+}
+.typing { color: var(--muted); font-style: italic; }
+
+.composer-area {
+  padding: 12px 18px 9px;
+  background: linear-gradient(transparent, var(--bg) 20%);
+}
+.composer {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  gap: 9px;
+  align-items: flex-end;
+  border: 1px solid #3b4d69;
+  border-radius: 17px;
+  padding: 9px;
+  background: var(--panel);
+}
+.composer textarea {
+  flex: 1;
+  min-width: 0;
+  max-height: 140px;
+  resize: none;
+  border: 0;
+  outline: none;
+  padding: 9px 7px;
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.composer textarea::placeholder { color: #8193ad; }
+.send-btn {
+  background: var(--blue);
+  border: 0;
+  border-radius: 11px;
+  min-width: 44px;
+  height: 42px;
+  color: white;
+  font-size: 19px;
+}
+.disclaimer {
+  max-width: 800px;
+  margin: 7px auto 0;
+  text-align: center;
+  color: #71829b;
+  font-size: 10px;
+}
+.overlay { display: none; }
+
+@media (max-width: 700px) {
+  .sidebar {
+    position: fixed;
+    z-index: 20;
+    inset: 0 auto 0 0;
+    width: min(300px, 85vw);
+    transform: translateX(-105%);
+    transition: transform .2s ease;
+    box-shadow: none;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 20px 0 60px #0008;
+  }
+  .overlay.show {
+    display: block;
+    position: fixed;
+    z-index: 15;
+    inset: 0;
+    background: #0009;
+  }
+  .menu-btn { display: inline-block; }
+  .topbar { min-height: 64px; padding: 10px 12px; }
+  .messages { padding: 18px 14px 25px; }
+  .message { max-width: 96%; font-size: 14px; }
+  .welcome { margin-top: 6vh; }
+  .suggestions { grid-template-columns: 1fr; }
+  .suggestion { min-height: 62px; }
+  .composer-area { padding: 9px 10px 7px; }
+  .status { font-size: 10px; }
 }
 </style>
 </head>
 
 <body>
-
-<header>
-  <img
-  class="logo"
-  src="./icon-192.png"
-  alt="Logo Kpakpa IA"
->
-  <div>
-    <div class="titre">Kpakpa IA</div>
-    <div class="sous-titre">Ton assistant intelligent</div>
-  </div>
-</header>
-
-<main id="messages">
-  <div class="accueil" id="accueil">
-    <h1>Bonjour ! 👋</h1>
-    <p>Je suis Kpakpa IA.<br>
-    Que puis-je faire pour toi aujourd'hui ?</p>
-
-    <div class="actions">
-      <button type="button" data-question="Présente-toi.">
-        Présente-toi
-      </button>
-      <button type="button" data-question="Aide-moi à apprendre quelque chose de nouveau.">
-        Apprendre
-      </button>
-      <button type="button" data-question="Donne-moi une idée de projet rentable avec peu de moyens.">
-        Idée de projet
-      </button>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img class="logo" src="./icon-192.png" alt="Logo Kpakpa IA">
+      <div>
+        <div class="brand-name">Kpakpa IA</div>
+        <div class="brand-sub">Ton assistant intelligent</div>
+      </div>
     </div>
-  </div>
-</main>
 
-<form id="chatForm">
-  <input
-    id="question"
-    type="text"
-    placeholder="Écris ta question..."
-    autocomplete="off"
-    required
-  >
-  <button id="envoyer" type="submit">Envoyer</button>
-</form>
+    <button class="btn btn-primary new-chat" id="newChat">＋ Nouvelle discussion</button>
 
-<script>
-const API_URL =
-  "https://white-union-ab54.trowonoukpakpa.workers.dev/";
+    <div class="history-heading">Tes discussions</div>
+    <div class="history-list" id="historyList"></div>
 
-const form = document.getElementById("chatForm");
-const input = document.getElementById("question");
-const messages = document.getElementById("messages");
-const envoyer = document.getElementById("envoyer");
-const accueil = document.getElementById("accueil");
+    <div class="sidebar-footer">
+      <strong>Kpakpa IA</strong><br>
+      Ton assistant, toujours à tes côtés.
+    </div>
+  </aside>
 
-let historique = [];
-let enCours = false;
+  <div class="overlay" id="overlay"></div>
 
-function ajouterMessage(texte, type) {
-  const bloc = document.createElement("div");
-  bloc.className = "message " + type;
-  bloc.textContent = texte;
-  messages.appendChild(bloc);
-  window.scrollTo(0, document.body.scrollHeight);
-  return bloc;
-}
+  <main class="main">
+    <header class="topbar">
+      <button class="btn menu-btn" id="menuBtn" aria-label="Ouvrir le menu">☰</button>
+      <div>
+        <div class="top-title" id="topTitle">Nouvelle discussion</div>
+        <div class="top-sub">Pose ta question, je suis là pour t'aider.</div>
+      </div>
+      <div class="status">Assistant prêt</div>
+    </header>
 
-async function envoyerQuestion(texte) {
-  if (enCours || !texte.trim()) return;
+    <section class="messages" id="messages" aria-live="polite"></section>
 
-  accueil.style.display = "none";
-  enCours = true;
-  input.disabled = true;
-  envoyer.disabled = true;
-
-  ajouterMessage(texte, "user");
-
-  const attente = ajouterMessage(
-    "Kpakpa IA réfléchit...",
-    "ai"
-  );
-
-  const anciensMessages = historique.slice();
-
-  historique.push({
-    role: "user",
-    content: texte
-  });
-
-  try {
-    const reponse = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        messages: historique.slice(-20)
-      })
-    });
-
-    const data = await reponse.json();
-
-    if (!reponse.ok || !data.reply) {
-      throw new Error(
-        data.error || "Le service IA n'a pas répondu."
-      );
-    }
-
-    attente.textContent = data.reply;
-
-    historique.push({
-      role: "assistant",
-      content: data.reply
-    });
-
-  } catch (erreur) {
-    historique = anciensMessages;
-    attente.textContent =
-      "Je n'arrive pas à obtenir une réponse pour le moment.\n\n" +
-      "Détail : " + erreur.message +
-      "\n\nVérifie le serveur et ta connexion Internet, puis réessaie.";
-  } finally {
-    enCours = false;
-    input.disabled = false;
-    envoyer.disabled = false;
-    input.focus();
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-}
-
-form.addEventListener("submit", function(e) {
-  e.preventDefault();
-  const texte = input.value.trim();
-  if (!texte) return;
-
-  input.value = "";
-  envoyerQuestion(texte);
-});
-
-document.querySelectorAll("[data-question]").forEach(bouton => {
-  bouton.addEventListener("click", function() {
-    envoyerQuestion(bouton.dataset.question);
-  });
-});
-</script>
-
-<div class="pied">
-  Kpakpa IA · Assistant intelligent
+    <div class="composer-area">
+      <form class="composer" id="chatForm">
+        <textarea id="question" rows="1" placeholder="Écris ta question..." aria-label="Ta question" required></textarea>
+        <button class="send-btn" id="sendBtn" type="submit" aria-label="Envoyer">➤</button>
+      </form>
+      <div class="disclaimer">Les réponses de l'IA peuvent contenir des erreurs. Vérifie les informations importantes.</div>
+    </div>
+  </main>
 </div>
 
 <script>
+const API_URL = "https://white-union-ab54.trowonoukpakpa.workers.dev/";
+const STORAGE_KEY = "kpakpa_ia_conversations_v1";
+
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const historyList = document.getElementById("historyList");
+const messagesBox = document.getElementById("messages");
+const topTitle = document.getElementById("topTitle");
+const form = document.getElementById("chatForm");
+const input = document.getElementById("question");
+const sendBtn = document.getElementById("sendBtn");
+
+let conversations = [];
+let currentId = null;
+let busy = false;
+
+function makeId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function loadConversations() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (Array.isArray(saved)) {
+      conversations = saved.filter(c =>
+        c && typeof c.id === "string" &&
+        Array.isArray(c.messages)
+      );
+    }
+  } catch (e) {
+    conversations = [];
+  }
+}
+
+function saveConversations() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+  } catch (e) {
+    alert("Le téléphone ne peut pas enregistrer davantage d'historique. Supprime quelques anciennes discussions.");
+  }
+}
+
+function createConversation() {
+  const c = {
+    id: makeId(),
+    title: "Nouvelle discussion",
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    messages: []
+  };
+  conversations.unshift(c);
+  currentId = c.id;
+  saveConversations();
+  renderHistory();
+  renderMessages();
+  closeMenu();
+  input.focus();
+}
+
+function currentConversation() {
+  return conversations.find(c => c.id === currentId);
+}
+
+function escapeTitle(text) {
+  return String(text || "").replace(/\s+/g, " ").trim().slice(0, 38);
+}
+
+function formatDate(timestamp) {
+  return new Date(timestamp || Date.now()).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit"
+  });
+}
+
+function renderHistory() {
+  historyList.replaceChildren();
+
+  if (!conversations.length) {
+    const empty = document.createElement("div");
+    empty.style.cssText = "color:var(--muted);font-size:12px;padding:8px;";
+    empty.textContent = "Tes nouvelles discussions apparaîtront ici.";
+    historyList.appendChild(empty);
+    return;
+  }
+
+  conversations.forEach(c => {
+    const item = document.createElement("div");
+    item.className = "history-item" + (c.id === currentId ? " active" : "");
+
+    const open = document.createElement("button");
+    open.className = "history-open";
+    open.type = "button";
+    open.title = c.title;
+    open.addEventListener("click", () => {
+      currentId = c.id;
+      renderHistory();
+      renderMessages();
+      closeMenu();
+    });
+
+    const title = document.createElement("span");
+    title.className = "history-title";
+    title.textContent = c.title || "Nouvelle discussion";
+
+    const date = document.createElement("span");
+    date.className = "history-date";
+    date.textContent = formatDate(c.updatedAt);
+
+    open.append(title, date);
+
+    const rename = document.createElement("button");
+    rename.className = "small-btn";
+    rename.type = "button";
+    rename.textContent = "✎";
+    rename.title = "Renommer la discussion";
+    rename.setAttribute("aria-label", "Renommer la discussion");
+    rename.addEventListener("click", () => {
+      const value = prompt("Nouveau titre :", c.title);
+      if (value && value.trim()) {
+        c.title = escapeTitle(value) || "Nouvelle discussion";
+        saveConversations();
+        renderHistory();
+        if (c.id === currentId) topTitle.textContent = c.title;
+      }
+    });
+
+    const remove = document.createElement("button");
+    remove.className = "small-btn";
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.title = "Supprimer la discussion";
+    remove.setAttribute("aria-label", "Supprimer la discussion");
+    remove.addEventListener("click", () => {
+      if (!confirm("Supprimer cette discussion définitivement ?")) return;
+      conversations = conversations.filter(x => x.id !== c.id);
+      if (currentId === c.id) {
+        currentId = conversations.length ? conversations[0].id : null;
+      }
+      saveConversations();
+      renderHistory();
+      renderMessages();
+    });
+
+    item.append(open, rename, remove);
+    historyList.appendChild(item);
+  });
+}
+
+function renderWelcome() {
+  const welcome = document.createElement("div");
+  welcome.className = "welcome";
+
+  const logo = document.createElement("img");
+  logo.className = "welcome-logo";
+  logo.src = "./icon-192.png";
+  logo.alt = "Kpakpa IA";
+
+  const h = document.createElement("h1");
+  h.textContent = "Bonjour ! 👋";
+
+  const p = document.createElement("p");
+  p.textContent = "Je suis Kpakpa IA. Que puis-je faire pour toi aujourd'hui ?";
+
+  const suggestions = document.createElement("div");
+  suggestions.className = "suggestions";
+
+  const choices = [
+    ["📚 Apprendre", "Explique-moi un sujet difficile simplement."],
+    ["💡 Idée de projet", "Donne-moi une idée de projet rentable avec peu de moyens."],
+    ["✍️ Écrire", "Aide-moi à rédiger un texte clair et professionnel."],
+    ["💻 Informatique", "Apprends-moi une notion d'informatique étape par étape."]
+  ];
+
+  choices.forEach(([heading, question]) => {
+    const b = document.createElement("button");
+    b.className = "suggestion";
+    b.type = "button";
+
+    const strong = document.createElement("strong");
+    strong.textContent = heading;
+
+    const span = document.createElement("span");
+    span.textContent = question;
+
+    b.append(strong, span);
+    b.addEventListener("click", () => sendQuestion(question));
+    suggestions.appendChild(b);
+  });
+
+  welcome.append(logo, h, p, suggestions);
+  messagesBox.appendChild(welcome);
+}
+
+function addMessage(text, role, actions = false) {
+  const block = document.createElement("div");
+  block.className = "message " + (role === "user" ? "user" : "ai");
+
+  if (role !== "user") {
+    const label = document.createElement("div");
+    label.className = "message-label";
+    label.textContent = "✦ Kpakpa IA";
+    block.appendChild(label);
+  }
+
+  const content = document.createElement("div");
+  content.textContent = text;
+  block.appendChild(content);
+
+  if (actions && role === "assistant") {
+    const bar = document.createElement("div");
+    bar.className = "message-actions";
+
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.textContent = "Copier";
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(text);
+        copy.textContent = "Copié ✓";
+      } catch (e) {
+        const area = document.createElement("textarea");
+        area.value = text;
+        document.body.appendChild(area);
+        area.select();
+        const ok = document.execCommand("copy");
+        area.remove();
+        copy.textContent = ok ? "Copié ✓" : "Copie impossible";
+      }
+    });
+
+    bar.appendChild(copy);
+    block.appendChild(bar);
+  }
+
+  messagesBox.appendChild(block);
+  return block;
+}
+
+function renderMessages() {
+  messagesBox.replaceChildren();
+  const c = currentConversation();
+
+  topTitle.textContent = c ? c.title : "Nouvelle discussion";
+
+  if (!c || c.messages.length === 0) {
+    renderWelcome();
+    return;
+  }
+
+  c.messages.forEach(m => {
+    addMessage(m.content, m.role, m.role === "assistant");
+  });
+
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+}
+
+function closeMenu() {
+  sidebar.classList.remove("open");
+  overlay.classList.remove("show");
+}
+
+document.getElementById("newChat").addEventListener("click", createConversation);
+
+document.getElementById("menuBtn").addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  overlay.classList.toggle("show");
+});
+
+overlay.addEventListener("click", closeMenu);
+
+input.addEventListener("input", () => {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight, 140) + "px";
+});
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    form.requestSubmit();
+  }
+});
+
+async function sendQuestion(rawText) {
+  const text = String(rawText || "").trim();
+  if (!text || busy) return;
+
+  if (!currentConversation()) createConversation();
+  const c = currentConversation();
+  if (!c) return;
+
+  busy = true;
+  sendBtn.disabled = true;
+  input.disabled = true;
+
+  const welcome = messagesBox.querySelector(".welcome");
+  if (welcome) welcome.remove();
+
+  c.messages.push({ role: "user", content: text });
+  if (c.title === "Nouvelle discussion") {
+    c.title = escapeTitle(text) || "Nouvelle discussion";
+  }
+  c.updatedAt = Date.now();
+  saveConversations();
+  renderHistory();
+  topTitle.textContent = c.title;
+
+  addMessage(text, "user");
+  const waiting = addMessage("Kpakpa IA réfléchit...", "assistant");
+  waiting.classList.add("typing");
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+
+  input.value = "";
+  input.style.height = "auto";
+
+  try {
+    const payloadMessages = c.messages.map(m => ({
+      role: m.role,
+      content: m.content
+    })).slice(-20);
+
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: payloadMessages })
+    });
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      throw new Error("Le serveur n'a pas renvoyé une réponse valide.");
+    }
+
+    if (!response.ok || !data.reply) {
+      throw new Error(data.error || "Le service IA n'a pas répondu.");
+    }
+
+    c.messages.push({ role: "assistant", content: data.reply });
+    waiting.remove();
+    addMessage(data.reply, "assistant", true);
+    c.updatedAt = Date.now();
+    saveConversations();
+    renderHistory();
+  } catch (error) {
+    c.messages.pop();
+    waiting.classList.remove("typing");
+    waiting.querySelector("div:last-child").textContent =
+      "Je n'arrive pas à obtenir une réponse pour le moment.\n\n" +
+      "Détail : " + error.message +
+      "\n\nVérifie ta connexion Internet puis réessaie.";
+    saveConversations();
+  } finally {
+    busy = false;
+    sendBtn.disabled = false;
+    input.disabled = false;
+    input.focus();
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+  }
+}
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  sendQuestion(input.value);
+});
+
+loadConversations();
+
+if (conversations.length) {
+  currentId = conversations[0].id;
+} else {
+  currentId = null;
+}
+
+renderHistory();
+renderMessages();
+
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function () {
-    navigator.serviceWorker.register("./sw.js")
-      .then(function (registration) {
-        console.log("Kpakpa IA : service worker enregistré.", registration.scope);
-      })
-      .catch(function (error) {
-        console.error("Erreur service worker :", error);
-      });
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(error => {
+      console.error("Service worker :", error);
+    });
   });
 }
 </script>
-  
 </body>
-</html>
+  </html>
+  
