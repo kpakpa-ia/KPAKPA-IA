@@ -682,7 +682,11 @@ function addMessage(text, role, actions = false) {
       }
     });
 
-    bar.appendChild(copy);
+    bar.appendChild(copy);const speak = document.createElement("button");
+speak.type = "button";
+speak.textContent = "🔊 Lire";
+speak.addEventListener("click", () => lireTexte(text));
+bar.appendChild(speak);
     block.appendChild(bar);
   }
 
