@@ -297,5 +297,19 @@ document.querySelectorAll("[data-question]").forEach(bouton => {
   Kpakpa IA · Assistant intelligent
 </div>
 
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js")
+      .then(function (registration) {
+        console.log("Kpakpa IA : service worker enregistré.", registration.scope);
+      })
+      .catch(function (error) {
+        console.error("Erreur service worker :", error);
+      });
+  });
+}
+</script>
+  
 </body>
 </html>
