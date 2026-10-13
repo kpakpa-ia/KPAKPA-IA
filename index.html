@@ -381,10 +381,13 @@ button:disabled { opacity: .55; cursor: wait; }
     <section class="messages" id="messages" aria-live="polite"></section>
 
     <div class="composer-area">
-      <form class="composer" id="chatForm">
-        <textarea id="question" rows="1" placeholder="Écris ta question..." aria-label="Ta question" required></textarea>
-        <button class="send-btn" id="sendBtn" type="submit" aria-label="Envoyer">➤</button>
-      </form>
+      
+<form class="composer" id="chatForm">
+  <button class="btn" id="micBtn" type="button" aria-label="Dicter une question" title="Dicter une question">🎙️</button>
+  <textarea id="question" rows="1" placeholder="Écris ou dicte ta question..." aria-label="Ta question" required></textarea>
+  <button class="send-btn" id="sendBtn" type="submit" aria-label="Envoyer">➤</button>
+</form>
+      
       <div class="disclaimer">Les réponses de l'IA peuvent contenir des erreurs. Vérifie les informations importantes.</div>
     </div>
   </main>
@@ -403,6 +406,64 @@ const form = document.getElementById("chatForm");
 const input = document.getElementById("question");
 const sendBtn = document.getElementById("sendBtn");
 
+const micBtn = document.getElementById("micBtn");
+
+// Lecture à voix haute
+function lireTexte(texte) {
+  if (!("speechSynthesis" in window)) {
+    alert("La lecture vocale n'est pas disponible sur ce navigateur.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const parole = new SpeechSynthesisUtterance(texte);
+  parole.lang = "fr-FR";
+  parole.rate = 1;
+  window.speechSynthesis.speak(parole);
+}
+
+// Dictée vocale si le navigateur la prend en charge
+const ReconnaissanceVocale =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (ReconnaissanceVocale) {
+  const reconnaissance = new ReconnaissanceVocale();
+  reconnaissance.lang = "fr-FR";
+  reconnaissance.continuous = false;
+  reconnaissance.interimResults = false;
+
+  micBtn.addEventListener("click", () => {
+    try {
+      reconnaissance.start();
+      micBtn.textContent = "🎧";
+    } catch (e) {
+      alert("Le microphone est déjà actif. Réessaie dans un instant.");
+    }
+  });
+
+  reconnaissance.onresult = (event) => {
+    const texte = event.results[0][0].transcript;
+    input.value = (input.value + " " + texte).trim();
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+    micBtn.textContent = "🎙️";
+  };
+
+  reconnaissance.onerror = () => {
+    micBtn.textContent = "🎙️";
+    alert("La dictée n'a pas fonctionné. Vérifie l'autorisation du microphone et ta connexion Internet.");
+  };
+
+  reconnaissance.onend = () => {
+    micBtn.textContent = "🎙️";
+  };
+} else {
+  micBtn.addEventListener("click", () => {
+    alert("La dictée vocale n'est pas prise en charge ici. Essaie Chrome sur Android.");
+  });
+  }
+  
 let conversations = [];
 let currentId = null;
 let busy = false;
